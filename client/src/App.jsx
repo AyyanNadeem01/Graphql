@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useState } from "react";
+import styles from "./App.module.css";
 
 const GET_USERS = gql`
   query getUsers {
@@ -201,35 +202,25 @@ function App() {
 
   if (!isAuthenticated) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          backgroundColor: "#222",
-          color: "white"
-        }}
-      >
-        <h1>Login</h1>
-        <input
-          value={loginUsername}
-          onChange={(e) => setLoginUsername(e.target.value)}
-          placeholder="Username..."
-          style={{ marginBottom: "10px" }}
-        />
-        <input
-          type="password"
-          value={loginPassword}
-          onChange={(e) => setLoginPassword(e.target.value)}
-          placeholder="Password..."
-          style={{ marginBottom: "10px" }}
-        />
-        <button onClick={handleLogin} disabled={loggingIn}>
-          {loggingIn ? "Logging in..." : "Login"}
-        </button>
-        {loginError && <p>Error: {loginError.message}</p>}
+      <div className={styles.loginContainer}>
+        <div className={styles.loginBox}>
+          <h1>Login</h1>
+          <input
+            value={loginUsername}
+            onChange={(e) => setLoginUsername(e.target.value)}
+            placeholder="Username..."
+          />
+          <input
+            type="password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            placeholder="Password..."
+          />
+          <button className={styles.button} onClick={handleLogin} disabled={loggingIn}>
+            {loggingIn ? "Logging in..." : "Login"}
+          </button>
+          {loginError && <div className={styles.errorMessage}>Error: {loginError.message}</div>}
+        </div>
       </div>
     );
   }
@@ -239,115 +230,149 @@ function App() {
   if (errorById) return <p>Error: {errorById.message}</p>;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#222",
-        color: "white",
-        gap: "24px"
-      }}
-    >
-      <button
-        onClick={handleLogout}
-        style={{ alignSelf: "flex-end", margin: "20px", padding: "8px 16px" }}
-      >
+    <div className={styles.container}>
+      <button className={`${styles.button} ${styles.logoutButton}`} onClick={handleLogout}>
         Logout
       </button>
-      <div style={{ textAlign: "center" }}>
-        <h1>Users</h1>
-        {data?.getUser?.map((user) => (
-          <p key={user.id}>
-            {user.name} — Age: {user.age} — Married: {user.isMarried ? "Yes" : "No"}
-          </p>
-        ))}
+
+      <div className={styles.section}>
+        <div className={styles.usersContainer}>
+          <h1 className={styles.sectionTitle}>All Users</h1>
+          <ul className={styles.usersList}>
+            {data?.getUser?.length > 0 ? (
+              data.getUser.map((user) => (
+                <li key={user.id} className={styles.userItem}>
+                  <p className={styles.userText}>
+                    <span className={styles.userLabel}>Name:</span>
+                    <span className={styles.userValue}>{user.name}</span>
+                  </p>
+                  <p className={styles.userText}>
+                    <span className={styles.userLabel}>Age:</span>
+                    <span className={styles.userValue}>{user.age}</span>
+                  </p>
+                  <p className={styles.userText}>
+                    <span className={styles.userLabel}>Married:</span>
+                    <span className={styles.userValue}>{user.isMarried ? "Yes" : "No"}</span>
+                  </p>
+                </li>
+              ))
+            ) : (
+              <li className={styles.userItem}>
+                <p className={styles.userText}>No users found</p>
+              </li>
+            )}
+          </ul>
+        </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-        <h1>User by ID ({userId || ""})</h1>
-        <input
-          value={userId}
-          onChange={(e) => handleUserIdChange(e.target.value)}
-          placeholder="User ID..."
-          style={{ textAlign: "center" }}
-        />
-        {dataById?.getUserById ? (
-          <p>
-            {dataById.getUserById.name} — Age: {dataById.getUserById.age} — Married: {" "}
-            {dataById.getUserById.isMarried ? "Yes" : "No"}
-          </p>
-        ) : (
-          <p>No user found</p>
-        )}
+      <div className={styles.section}>
+        <div className={styles.userByIdContainer}>
+          <h1 className={styles.sectionTitle}>User by ID</h1>
+          <input
+            className={styles.userIdInput}
+            value={userId}
+            onChange={(e) => handleUserIdChange(e.target.value)}
+            placeholder="Enter User ID..."
+          />
+          {dataById?.getUserById ? (
+            <div className={styles.userInfo}>
+              <p className={styles.userText}>
+                <span className={styles.userLabel}>Name:</span>
+                <span className={styles.userValue}>{dataById.getUserById.name}</span>
+              </p>
+              <p className={styles.userText}>
+                <span className={styles.userLabel}>Age:</span>
+                <span className={styles.userValue}>{dataById.getUserById.age}</span>
+              </p>
+              <p className={styles.userText}>
+                <span className={styles.userLabel}>Married:</span>
+                <span className={styles.userValue}>{dataById.getUserById.isMarried ? "Yes" : "No"}</span>
+              </p>
+            </div>
+          ) : (
+            <div className={styles.userInfo}>
+              <p className={styles.userText}>No user found</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "320px" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div className={styles.formSection}>
+        <div className={styles.formCard}>
           <h2>Create New User</h2>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name..."
-          />
-          <input
-            value={newUsername}
-            onChange={(e) => setNewUsername(e.target.value)}
-            placeholder="Username..."
-          />
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Password..."
-          />
-          <input
-            type="number"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            placeholder="Age..."
-          />
-          <label>
+          <div className={styles.formGroup}>
             <input
-              type="checkbox"
-              checked={isMarried}
-              onChange={(e) => setIsMarried(e.target.checked)}
+              className={styles.formInput}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Name..."
             />
-            Married
-          </label>
-          <button onClick={handleCreateUser} disabled={creating}>
-            {creating ? "Creating..." : "Create User"}
-          </button>
-          {createError && <p>Error: {createError.message}</p>}
+            <input
+              className={styles.formInput}
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+              placeholder="Username..."
+            />
+            <input
+              className={styles.formInput}
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Password..."
+            />
+            <input
+              className={styles.formInput}
+              type="number"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              placeholder="Age..."
+            />
+            <label className={styles.checkboxLabel}>
+              <input
+                className={styles.checkboxInput}
+                type="checkbox"
+                checked={isMarried}
+                onChange={(e) => setIsMarried(e.target.checked)}
+              />
+              Married
+            </label>
+            <button className={`${styles.button} ${styles.formButton}`} onClick={handleCreateUser} disabled={creating}>
+              {creating ? "Creating..." : "Create User"}
+            </button>
+            {createError && <div className={styles.errorMessage}>Error: {createError.message}</div>}
+          </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div className={styles.formCard}>
           <h2>Update User</h2>
-          <input
-            value={updateName}
-            onChange={(e) => setUpdateName(e.target.value)}
-            placeholder="Name..."
-          />
-          <input
-            type="number"
-            value={updateAge}
-            onChange={(e) => setUpdateAge(e.target.value)}
-            placeholder="Age..."
-          />
-          <label>
+          <div className={styles.formGroup}>
             <input
-              type="checkbox"
-              checked={updateIsMarried}
-              onChange={(e) => setUpdateIsMarried(e.target.checked)}
+              className={styles.formInput}
+              value={updateName}
+              onChange={(e) => setUpdateName(e.target.value)}
+              placeholder="Name..."
             />
-            Married
-          </label>
-          <button onClick={handleUpdateUser} disabled={updating}>
-            {updating ? "Updating..." : "Update User"}
-          </button>
-          {updateError && <p>Error: {updateError.message}</p>}
+            <input
+              className={styles.formInput}
+              type="number"
+              value={updateAge}
+              onChange={(e) => setUpdateAge(e.target.value)}
+              placeholder="Age..."
+            />
+            <label className={styles.checkboxLabel}>
+              <input
+                className={styles.checkboxInput}
+                type="checkbox"
+                checked={updateIsMarried}
+                onChange={(e) => setUpdateIsMarried(e.target.checked)}
+              />
+              Married
+            </label>
+            <button className={`${styles.button} ${styles.formButton}`} onClick={handleUpdateUser} disabled={updating}>
+              {updating ? "Updating..." : "Update User"}
+            </button>
+            {updateError && <div className={styles.errorMessage}>Error: {updateError.message}</div>}
+          </div>
         </div>
       </div>
     </div>
