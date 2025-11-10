@@ -3,7 +3,7 @@ import { startStandaloneServer } from "@apollo/server/standalone";
 
 const users = [
   { id: "1", name: "John Doe", age: 30, isMarried: true },
-0  { id: "2", name: "Jane Smith", age: 25, isMarried: false },
+  { id: "2", name: "Jane Smith", age: 25, isMarried: false },
   { id: "3", name: "Alice Johnson", age: 28, isMarried: false },
 ];
 
@@ -15,7 +15,8 @@ const typeDefs = `
 
   type Mutation {
     createUser(name: String!, age: Int!, isMarried: Boolean!): User
-  }
+    updateUser(id: ID!, name: String, age: Int, isMarried: Boolean): User
+    }
 
   type User {
     id: ID
@@ -41,6 +42,16 @@ const resolvers = {
       };
       users.push(newUser);
       return newUser;
+    },
+     updateUser: (parent, args) => {
+      const user = users.find((u) => u.id === args.id);
+      if (!user) throw new Error("User not found");
+
+      if (args.name !== undefined) user.name = args.name;
+      if (args.age !== undefined) user.age = args.age;
+      if (args.isMarried !== undefined) user.isMarried = args.isMarried;
+
+      return user;
     },
   },
 };

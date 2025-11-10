@@ -1,8 +1,7 @@
 import { gql } from "@apollo/client";
 import { useQuery,useMutation } from "@apollo/client/react";
-
-
 import { useState } from "react";
+
 
 const GET_USERS = gql`
   query getUsers {
@@ -37,36 +36,43 @@ const CREATE_USER = gql`
   }
 `;
 
+const UPDATE_USER = gql`
+  mutation UpdateUser($id: ID!, $name: String, $age: Int, $isMarried: Boolean) {
+    updateUser(id: $id, name: $name, age: $age, isMarried: $isMarried) {
+      id
+      name
+      age
+      isMarried
+    }
+  }
+`;
+
 function App() {
-  // 🔹 State for new user input
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [isMarried, setIsMarried] = useState(false);
 
-  // 🔹 Queries
   const { data, loading, error } = useQuery(GET_USERS);
   const { data: dataById, loading: loadingById, error: errorById } = useQuery(
     GET_USER_BY_ID,
-    {
-      variables: { id: "3" },
-    }
+    { variables: { id: "3" } }
   );
 
-  // 🔹 Mutation
-  const [createUser, { loading: creating, error: createError }] =
-    useMutation(CREATE_USER, {
-      refetchQueries: [{ query: GET_USERS }],
-    });
+  const [createUser, { loading: creating, error: createError }] = useMutation(
+    CREATE_USER,
+    { refetchQueries: [{ query: GET_USERS }] }
+  );
 
-  // 🔹 Create User Handler
+  // ✅ New updateUser mutation
+  const [updateUser, { loading: updating, error: updateError }] = useMutation(
+    UPDATE_USER,
+    { refetchQueries: [{ query: GET_USERS }] }
+  );
+
   const handleCreateUser = async () => {
     try {
       await createUser({
-        variables: {
-          name,
-          age: Number(age),
-          isMarried,
-        },
+        variables: { name, age: Number(age), isMarried },
       });
       alert("✅ User created successfully!");
       setName("");
@@ -77,7 +83,17 @@ function App() {
     }
   };
 
-  // 🔹 Loading and Error States
+  const handleUpdateUser = async () => {
+    try {
+      await updateUser({
+        variables: { id: "3", name: "Updated Alice", age: 29, isMarried: true },
+      });
+      alert("✅ User updated successfully!");
+    } catch (err) {
+      console.error("Error updating user:", err);
+    }
+  };
+
   if (loading || loadingById) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
   if (errorById) return <p>Error: {errorById.message}</p>;
@@ -135,11 +151,16 @@ function App() {
         <button onClick={handleCreateUser} disabled={creating}>
           {creating ? "Creating..." : "Create User"}
         </button>
+
+        <button onClick={handleUpdateUser} disabled={updating}>
+          {updating ? "Updating..." : "Update User (ID 3)"}
+        </button>
+
         {createError && <p>Error: {createError.message}</p>}
+        {updateError && <p>Error: {updateError.message}</p>}
       </div>
     </div>
   );
 }
-
 
 export default App;
